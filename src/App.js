@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import quizQuestions from './api/quizQuestions';
+//import quizQuestions from './api/quizQuestions';
 import Quiz from './components/Quiz';
 import Result from './components/Result';
 import './App.css';
@@ -23,7 +23,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:3333/questions')
+    axios.get('https://agile-everglades-26580.herokuapp.com/questions')
   .then(function (response) {
     // handle success
     this.setState({quizQuestions:response})
@@ -66,7 +66,7 @@ class App extends Component {
   handleAnswerSelected(event) {
     this.setUserAnswer(event.currentTarget.value);
 
-    if (this.state.questionId < quizQuestions.length) {
+    if (this.state.questionId < this.state.quizQuestions.length) {
       setTimeout(() => this.setNextQuestion(), 300);
     } else {
       setTimeout(() => this.setResults(this.getResults()), 300);
@@ -90,8 +90,8 @@ class App extends Component {
     this.setState({
       counter: counter,
       questionId: questionId,
-      question: quizQuestions[counter].question,
-      answerOptions: quizQuestions[counter].answers,
+      question: this.state.quizQuestions[counter].question,
+      answerOptions: this.state.quizQuestions[counter].answers,
       answer: ''
     });
   }
@@ -120,7 +120,7 @@ class App extends Component {
         answerOptions={this.state.answerOptions}
         questionId={this.state.questionId}
         question={this.state.question}
-        questionTotal={quizQuestions.length}
+        questionTotal={this.state.quizQuestions.length}
         onAnswerSelected={this.handleAnswerSelected}
       />
     );
