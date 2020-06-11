@@ -1,24 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransitionGroup } from 'react-transition-group';
-import Question from '../components/Question';
-import QuestionCount from '../components/QuestionCount';
-import AnswerOption from '../components/AnswerOption';
 
 function Quiz(props) {
-  function renderAnswerOptions(key) {
-    return (
-      <AnswerOption
-        key={key.content}
-        answerContent={key.content}
-        answerType={key.type}
-        answer={props.answer}
-        questionId={props.questionId}
-        onAnswerSelected={props.onAnswerSelected}
-      />
-    );
-  }
-
+console.log(props.answer)
   return (
     <CSSTransitionGroup
       className="container"
@@ -35,14 +20,22 @@ function Quiz(props) {
         </div>
         <h2 className="question">{props.question}</h2>
         <ul className="answerOptions">
-          {props.answerOptions.map(key=> <AnswerOption
-        key={key.content}
-        answerContent={key.content}
-        answerType={key.type}
-        answer={props.answer}
-        questionId={props.questionId}
-        onAnswerSelected={props.onAnswerSelected}
+          {props.answerOptions.map(key=>
+      <li className="answerOption" key= {key._id}>
+      <input
+        type="radio"
+        className="radioCustomButton"
+        name="radioGroup"
+        checked={key.text === props.answer}
+        id={key.text}
+        value={key.text}
+        disabled={props.answer}
+        onChange={props.onAnswerSelected}
       />
+      <label className="radioCustomLabel" htmlFor={key.text}>
+        {key.text}
+      </label>
+    </li>
       )}
         </ul>
       </div>

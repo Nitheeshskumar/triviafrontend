@@ -1,60 +1,52 @@
-import React, { Component } from 'react';
-//import quizQuestions from './api/quizQuestions';
+import React from 'react';
 import Quiz from './components/Quiz';
 import Result from './components/Result';
+import Login from './components/Login'
 import './App.css';
 import axios from 'axios'
-class App extends Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      counter: 0,
-      questionId: 1,
-      question: '',
-      answerOptions: [],
-      answer: '',
-      answersCount: {},
-      result: '',
-      quizQuestions:[]
-    };
+const App = props => {
 
-    this.handleAnswerSelected = this.handleAnswerSelected.bind(this);
-  }
+  const [counter, setCounter] = React.useState(0)
+  const [questionId, setQuestionId] = React.useState(1)
+  const [question, setQuestion] = React.useState('')
+  const [answerOptions, setAnswerOptions] = React.useState([])
+  const [answer, setAnswer] = React.useState('')
+  const result = React.useRef(0)
+  const [quizQuestions, setQuizQuestions] = React.useState([]);
+  const [isLoggedin, setIsLoggedIn] = React.useState(false);
+  const [user, setUser] = React.useState({});
+  const [dashboard,setDashboard]=React.useState([]);
 
-  componentDidMount() {
+
+  const loadinitialData = () => {
+    setQuestionId(1); setCounter(0); setQuestion(''); setAnswerOptions([]); setAnswer(''); result.current=0; setQuizQuestions([])
     axios.get('https://agile-everglades-26580.herokuapp.com/questions')
-  .then(function (response) {
-    // handle success
-    this.setState({quizQuestions:response})
-    console.log(response);
-    const shuffledAnswerOptions = response.map(question =>
-      this.shuffleArray(question.answers)
-    );
-    this.setState({
-      question: response[0].question,
-      answerOptions: shuffledAnswerOptions[0]
-    });
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  })
-
+      .then((response) => {
+        const shuffledAnswerOptions = response.data.map(question =>
+          shuffleArray(question.alternatives)
+        );
+        setQuestion(response.data[0].description);
+        setAnswerOptions(shuffledAnswerOptions[0]);
+        setQuizQuestions(response.data)
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
   }
 
-  shuffleArray(array) {
+
+  React.useEffect(() => {
+    loadinitialData()
+  }, [])
+
+  const shuffleArray = (array) => {
     var currentIndex = array.length,
       temporaryValue,
       randomIndex;
-
-    // While there remain elements to shuffle...
     while (0 !== currentIndex) {
-      // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex -= 1;
-
-      // And swap it with the current element.
       temporaryValue = array[currentIndex];
       array[currentIndex] = array[randomIndex];
       array[randomIndex] = temporaryValue;
@@ -62,85 +54,89 @@ class App extends Component {
 
     return array;
   }
-
-  handleAnswerSelected(event) {
-    this.setUserAnswer(event.currentTarget.value);
-
-    if (this.state.questionId < this.state.quizQuestions.length) {
-      setTimeout(() => this.setNextQuestion(), 300);
+  const handleNext = () => {
+    if (questionId < quizQuestions.length) {
+      setTimeout(() => setNextQuestion(), 300);
     } else {
-      setTimeout(() => this.setResults(this.getResults()), 300);
+      debugger
+      let body = {...user,attempts:user.attempts+1,score:Math.max(result.current,user.score)}
+      axios.put('https://agile-everglades-26580.herokuapp.com/user',body).then(res=>{
+
+        axios.get('https://agile-everglades-26580.herokuapp.com/dashboard').then(res=>{
+          setDashboard(res.data)
+        }).catch(e=>console.log(e))
+      }).catch(e=>console.log(e))
+
+
+      setTimeout(() => {
+        setCounter((counter) => counter + 1);
+        setQuestionId((questionIdt) => questionIdt + 1);
+      }, 300);
     }
   }
 
-  setUserAnswer(answer) {
-    this.setState((state, props) => ({
-      answersCount: {
-        ...state.answersCount,
-        [answer]: (state.answersCount[answer] || 0) + 1
-      },
-      answer: answer
-    }));
-  }
-
-  setNextQuestion() {
-    const counter = this.state.counter + 1;
-    const questionId = this.state.questionId + 1;
-
-    this.setState({
-      counter: counter,
-      questionId: questionId,
-      question: this.state.quizQuestions[counter].question,
-      answerOptions: this.state.quizQuestions[counter].answers,
-      answer: ''
-    });
-  }
-
-  getResults() {
-    const answersCount = this.state.answersCount;
-    const answersCountKeys = Object.keys(answersCount);
-    const answersCountValues = answersCountKeys.map(key => answersCount[key]);
-    const maxAnswerCount = Math.max.apply(null, answersCountValues);
-
-    return answersCountKeys.filter(key => answersCount[key] === maxAnswerCount);
-  }
-
-  setResults(result) {
-    if (result.length === 1) {
-      this.setState({ result: result[0] });
-    } else {
-      this.setState({ result: 'Undetermined' });
+  const handleAnswerSelected = (event) => {
+    if (quizQuestions[counter].alternatives.find(e => e.isCorrect).text === event.currentTarget.value) {
+      result.current = result.current+1;
     }
+    setAnswer(event.currentTarget.value);
+    setTimeout(()=>{
+      handleNext()
+    },1000)
   }
 
-  renderQuiz() {
+
+  const setNextQuestion = () => {
+    const counters = counter + 1;
+    const questionIdt = questionId + 1;
+    setCounter(counters);
+    setQuestionId(questionIdt);
+    setQuestion(quizQuestions[counters].description);
+    setAnswerOptions(quizQuestions[counters].alternatives)
+    setAnswer('')
+  }
+  const renderQuiz = () => {
     return (
       <Quiz
-        answer={this.state.answer}
-        answerOptions={this.state.answerOptions}
-        questionId={this.state.questionId}
-        question={this.state.question}
-        questionTotal={this.state.quizQuestions.length}
-        onAnswerSelected={this.handleAnswerSelected}
+        answer={answer}
+        answerOptions={answerOptions}
+        questionId={questionId}
+        question={question}
+        questionTotal={quizQuestions.length}
+        onAnswerSelected={handleAnswerSelected}
+        handleNext={handleNext}
       />
     );
   }
+  const loginAction = () => {
+   const {value:name} = document.getElementById('name');
+   const {value:email} = document.getElementById('email');
+   let body = {
+     name:name,email:email
+   }
+   axios.put('https://agile-everglades-26580.herokuapp.com/user',body).then(res=>{
+     console.log(res)
+    setIsLoggedIn(true);
+    setUser(res.data);
+   }).catch(e=>console.log(e))
 
-  renderResult() {
-    return <Result quizResult={this.state.result} />;
   }
+  const renderResult = () => {
+    return <Result quizResult={result.current} statistics={dashboard}loadinitialData={loadinitialData} />
 
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src="https://images-na.ssl-images-amazon.com/images/I/51DWusHgn1L._SL1168_.jpg" className="App-logo" alt="logo" />
-          <h2>React Quiz</h2>
-        </div>
-        {this.state.result ? this.renderResult() : this.renderQuiz()}
+  }
+  const gameComp = () => questionId > quizQuestions.length ? renderResult() : renderQuiz();
+  const loginComp = () => <Login login={loginAction} />;
+  return (
+    <div className="App">
+      <div className="App-header">
+        <img src="https://images-na.ssl-images-amazon.com/images/I/51DWusHgn1L._SL1168_.jpg" className="App-logo" alt="logo" />
+  <h2>Covid Quiz   {isLoggedin && `Player: ${user.name}`}</h2>
       </div>
-    );
-  }
+      {!isLoggedin ? loginComp() : gameComp()}
+    </div>
+  );
+
 }
 
 export default App;

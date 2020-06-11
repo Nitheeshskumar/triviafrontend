@@ -14,14 +14,36 @@ function Result(props) {
       transitionAppearTimeout={500}
     >
       <div>
-        You prefer <strong>{props.quizResult}</strong>!
+        You Scored <strong>{props.quizResult}</strong>!
+      </div>
+
+      <button onClick = {props.loadinitialData}>Restart</button>
+      <div>
+      <table border="1">
+      <thead>
+            <tr>
+               <td colSpan = "4">Score Dashboard</td>
+            </tr>
+            <tr>
+    <td>Username</td><td>High Score</td><td>Attempts</td>
+  </tr>
+         </thead>
+{props.statistics.map((e,i)=>{
+  return <tbody key={i}>
+  <tr>
+    <td>{e.name}</td><td>{e.score}</td><td>{e.attempts}</td>
+  </tr>
+  </tbody>
+
+})}
+ </table>
       </div>
     </CSSTransitionGroup>
   );
 }
 
 Result.propTypes = {
-  quizResult: PropTypes.string.isRequired
+  quizResult: PropTypes.number.isRequired
 };
 
 export default Result;
