@@ -128,13 +128,10 @@ const App = props => {
   const gameComp = () => questionId > quizQuestions.length ? renderResult() : renderQuiz();
   const loginComp = () => <Login login={loginAction} />;
   return (
-    <div className="App">
-      <div className="App-header">
-        <img src="https://images-na.ssl-images-amazon.com/images/I/51DWusHgn1L._SL1168_.jpg" className="App-logo" alt="logo" />
-  <h2>Covid Quiz   {isLoggedin && `Player: ${user.name}`}</h2>
-      </div>
+   <>
       {!isLoggedin ? loginComp() : gameComp()}
-    </div>
+      </>
+
   );
 
 }
