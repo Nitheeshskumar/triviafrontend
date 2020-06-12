@@ -58,7 +58,6 @@ const App = props => {
     if (questionId < quizQuestions.length) {
       setTimeout(() => setNextQuestion(), 300);
     } else {
-      debugger
       let body = {...user,attempts:user.attempts+1,score:Math.max(result.current,user.score)}
       axios.put('https://agile-everglades-26580.herokuapp.com/user',body).then(res=>{
 
@@ -115,7 +114,6 @@ const App = props => {
      name:name,email:email
    }
    axios.put('https://agile-everglades-26580.herokuapp.com/user',body).then(res=>{
-     console.log(res)
     setIsLoggedIn(true);
     setUser(res.data);
    }).catch(e=>console.log(e))

@@ -1,8 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransitionGroup } from 'react-transition-group';
-
+import axios from 'axios'
+import {Table} from 'react-bootstrap'
 function Result(props) {
+const [dashboard,setDashboard] = React.useState([])
+React.useEffect(()=>{
+  axios.get('https://agile-everglades-26580.herokuapp.com/dashboard').then(res=>{
+    setDashboard(res.data)
+  }).catch(e=>console.log(e))
+})
+
   return (
     <CSSTransitionGroup
       className="container result"
@@ -13,37 +21,40 @@ function Result(props) {
       transitionAppear
       transitionAppearTimeout={500}
     >
-      <div>
+      {props.quizResult && <>
+        <div>
         You Scored <strong>{props.quizResult}</strong>!
       </div>
 
       <button onClick = {props.loadinitialData}>Restart</button>
+      </>}
+
       <div>
-      <table border="1">
+      <Table striped bordered hover style={{textAlign:"center"}}>
       <thead>
             <tr>
-               <td colSpan = "4">Score Dashboard</td>
+               <td colSpan = "4"> <strong>Score Dashboard</strong></td>
             </tr>
             <tr>
-    <td>Username</td><td>High Score</td><td>Attempts</td>
+            <td>No.</td><td>Username</td><td>High Score</td><td>Attempts</td>
   </tr>
          </thead>
-{props.statistics.map((e,i)=>{
+{(props.statistics||dashboard).map((e,i)=>{
   return <tbody key={i}>
   <tr>
-    <td>{e.name}</td><td>{e.score}</td><td>{e.attempts}</td>
+  <td>{i+1}</td><td>{e.name}</td><td>{e.score}</td><td>{e.attempts}</td>
   </tr>
   </tbody>
 
 })}
- </table>
+ </Table>
       </div>
     </CSSTransitionGroup>
   );
 }
 
 Result.propTypes = {
-  quizResult: PropTypes.number.isRequired
+  quizResult: PropTypes.number
 };
 
 export default Result;

@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import App from "./App";
 import Admin from './Admin'
+import Result from "./components/Result";
 
 export default function BasicExample() {
     return (
@@ -21,7 +22,7 @@ export default function BasicExample() {
               <App />
             </Route>
             <Route path="/dashboard">
-            <App />
+            <Result />
             </Route>
             <Route path="/admin">
               <Admin/>

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { CSSTransitionGroup } from 'react-transition-group';
 
 function Quiz(props) {
-console.log(props.answer)
   return (
     <CSSTransitionGroup
       className="container"
